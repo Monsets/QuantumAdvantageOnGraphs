@@ -1,32 +1,28 @@
 import numpy as np
-from networkx import gnm_random_graph
-from networkx.linalg.graphmatrix import adjacency_matrix
-from random_walks import CTRW, CTQRW
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 from config import config
+from utils import make_dirs
+from graph_generation import generate_path_graphs, generate_random_graphs
 
-RANDOM_SEED = 0
-np.random.seed(RANDOM_SEED)
+from time import time
 
-ctqrw = CTQRW()
+if __name__ == '__main__':
+    make_dirs()
 
-advantages = []
+    np.random.seed(config['random_seed'])
 
-target = config['target_node']
+    ''' Path graph with nodes [2, 10]'''
 
-for n in range(2, config['nodes']):
-    pt = np.log(n)
-    m = np.random.randint(low=n - 1, high=(n ** 2 - n) / 2)
+    start = time()
 
-    for _ in range(3):
-        G = gnm_random_graph(n, m, seed = RANDOM_SEED)
-        adj = adjacency_matrix(G).todense()
+    if config['include_path_graphs']:
+        generate_path_graphs()
 
-        # Quantum times
-        hist = ctqrw.run(time_steps = config['number_of_steps'],
-                         adjacency_matrix = adj,
-                         initial_node = config['initial_node'],
-                         target_node = target)
-        q_t = 0
-        for state_num, state in enumerate(hist.states):
-            if state.full()[target, target] > pt:
-                q_t = state_num
+    if config['include_random_graphs']:
+        generate_random_graphs()
+
+    print('Total time {}'.format(time() - start))
+
+

@@ -3,8 +3,14 @@ import numpy as np
 from tensorflow import keras
 
 
+''' Layers'''
+
 class EdgeToEdge(keras.layers.Layer):
+    """
+        Edge to edge layer
+    """
     def __init__(self, n):
+
         super(EdgeToEdge, self).__init__()
 
         K = np.zeros((n + 1, n + 1))
@@ -22,6 +28,9 @@ class EdgeToEdge(keras.layers.Layer):
 
 
 class EdgeToVertex(keras.layers.Layer):
+    """
+        Edge to edge layer
+    """
     def __init__(self, n):
         super(EdgeToVertex, self).__init__()
         K = np.zeros((n + 1, n + 1))
@@ -41,15 +50,16 @@ class EdgeToVertex(keras.layers.Layer):
         )
         return out
 
+''' Model '''
 
-def model(input):
+def CQNN(input):
     model = tf.keras.models.Sequential([
-        EdgeToEdge(n=input.shape[1]),
-        EdgeToVertex(n=input.shape[1]),
+        EdgeToEdge(n=input),
+        EdgeToVertex(n=input),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(5, activation='relu'),
         tf.keras.layers.Dropout(0.3),
-        tf.keras.layers.Dense(1, activation='sigmoid')
+        tf.keras.layers.Dense(2, activation='softmax')
     ])
 
     model.compile(optimizer='sgd',
