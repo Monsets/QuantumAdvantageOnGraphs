@@ -31,7 +31,7 @@ class CTRW:
         initial_vector = initial_vector
 
         # Create node-centric transition matrix
-        transition_matrix = adjacency_matrix / np.sum(adjacency_matrix, axis = 0)
+        transition_matrix = adjacency_matrix / np.clip(np.sum(adjacency_matrix, axis = 0), 1, len_nodes + 1           )
         # Absorbing node
         transition_matrix[:, target_node] = 0
         transition_matrix[target_node, target_node] = 1

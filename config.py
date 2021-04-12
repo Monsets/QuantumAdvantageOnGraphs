@@ -6,8 +6,8 @@ config = {
 
     # Generate graphs or not
 
-    'include_random_graphs': False,
-    'include_path_graphs': True,
+    'include_random_graphs': True,
+    'include_path_graphs': False,
 
     # ============ PATH GRAPH ============ #
 
@@ -18,7 +18,7 @@ config = {
     # ============ RANDOM GRAPH ============ #
 
     # Path graphs will be generated with number of nodes in n = 3, ..., max_node_path_graph
-    'random_graphs_amount': 10000,
+    'random_graphs_amount': 2000,
     'max_node_for_random_graph': 16,
     'min_node_for_random_graph': 15,
 
@@ -46,6 +46,6 @@ config = {
     # ============ CQCNN CONFIG ============ #
 
     # CQNN model config
-    'cqnn_epochs': 5,
-    'cqnn_samples_per_epoch': 3,
+    'cqnn_epochs': 3000,
+    'cqnn_samples_per_epoch': 100,
 }

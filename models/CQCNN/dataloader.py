@@ -31,7 +31,7 @@ class DataGenerator(tf.keras.utils.Sequence):
 
     X, Y = self.data[indexes], self.ranks[indexes]
 
-    return tf.convert_to_tensor(X.reshape(-1, *X.shape, 1)), tf.convert_to_tensor(Y)
+    return tf.convert_to_tensor(X.reshape(*X.shape, 1)), tf.convert_to_tensor(Y)
 
   def on_epoch_end(self):
     'Updates indexes after each epoch'

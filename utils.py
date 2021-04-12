@@ -46,6 +46,7 @@ def save_graph_rank(graph, rank, node_features, path):
 
 def plot_save_metrics(hist, path = 'results'):
   plt.subplot(2, 2, 1)
+  print(hist)
   plt.plot(hist['accuracy'], label='train accuracy')
   plt.plot(hist['val_accuracy'], label='val accuracy')
   plt.legend(loc='upper left')
@@ -57,13 +58,13 @@ def plot_save_metrics(hist, path = 'results'):
   plt.legend(loc='upper left')
   plt.title('Recall')
 
-  plt.subplot(2, 2, 1)
+  plt.subplot(2, 2, 3)
   plt.plot(hist['precision'], label='train precision')
   plt.plot(hist['val_precision'], label='val precision')
   plt.legend(loc='upper left')
   plt.title('Precision')
 
-  plt.subplot(2, 2, 1)
+  plt.subplot(2, 2, 4)
   plt.plot(hist['loss'], label='train loss')
   plt.plot(hist['val_loss'], label='val loss')
   plt.legend(loc='upper left')

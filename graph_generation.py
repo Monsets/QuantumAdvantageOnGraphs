@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import tqdm
 
 from sklearn.model_selection import train_test_split
 
@@ -138,7 +139,7 @@ def generate_random_graphs():
                                     high=config['max_node_for_random_graph'],
                                     size=config['random_graphs_amount'])
 
-  for step, n in enumerate(vertex_number):
+  for step, n in tqdm.tqdm(enumerate(vertex_number)):
     if step % 50 == 0:
       print(' {} / {} '.format(step, len(vertex_number)))
 
@@ -172,7 +173,7 @@ def generate_random_graphs():
 
   ''' Saving dataset '''
   g_train, g_test, n_f_train, n_f_test, y_train, y_test = \
-    train_test_split(graphs, node_features, ranks, test_size=0.1)
+    train_test_split(graphs, node_features, ranks, test_size=0.5)
 
   save_graph_rank(g_train, y_train, n_f_train, os.path.join(config['data_path'],
                                                             config['path_random_path'], 'train'))

@@ -1,7 +1,8 @@
 import tensorflow as tf
 import numpy as np
-from tensorflow import keras
 
+from tensorflow import keras
+from tensorflow_addons.optimizers import SWA
 
 ''' Layers'''
 
@@ -55,6 +56,7 @@ class EdgeToVertex(keras.layers.Layer):
 def CQNN(input):
     model = tf.keras.models.Sequential([
         EdgeToEdge(n=input),
+        tf.keras.layers.Conv2D(10, 3, 1, 'same'),
         EdgeToVertex(n=input),
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(5, activation='relu'),
@@ -62,7 +64,10 @@ def CQNN(input):
         tf.keras.layers.Dense(2, activation='softmax')
     ])
 
-    model.compile(optimizer='sgd',
+    sgd = tf.keras.optimizers.SGD(0.01)
+    # stocastic_avg_sgd = SWA(sgd, )
+
+    model.compile(optimizer=sgd,
                   loss=['binary_crossentropy'],
                   metrics=['accuracy', 'Recall', 'Precision', 'AUC'])
 
