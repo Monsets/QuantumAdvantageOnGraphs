@@ -23,8 +23,13 @@ test_generator = DataGenerator(graph_path = GRAPH_TEST_PATH,
                                 label_path = RANK_TEST_PATH,
                                 batch_size = 3)
 
-for x, y in test_generator:
-    print(x.shape, y.shape)
+ys = []
+
+for _, y in train_generator:
+    ys.extend(y)
+for _, y in test_generator:
+    ys.extend(y)
+print(np.bincount(np.argmax(ys, axis = 1)))
 
 cqnn = CQNN(input = 15)
 

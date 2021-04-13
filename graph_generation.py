@@ -72,7 +72,7 @@ def generate_path_graphs():
   ranks = []
   node_features = []
 
-  for n in range(3, config['max_node_for_path_graph']):
+  for n in range(6, config['max_node_for_path_graph']):
     # Path graph stays the same. The difference between graphs are only special nodes number
     # and those might be expressed through permutations
     print(n)
@@ -149,13 +149,16 @@ def generate_random_graphs():
 
     adj = adjacency_matrix(g).todense()
 
+    initial_node = np.random.randint(0, n // 2)
+    target_node = np.random.randint(n // 2 + 1, n)
+
     # Node features are starting and ending nodes
     # Encoded as vectors [true if initial node, true if target node]
     node_feature = np.zeros((n, 2))
-    node_feature[config['initial_node'], 0] = 1
-    node_feature[config['target_node'], 1] = 1
+    node_feature[initial_node, 0] = 1
+    node_feature[target_node, 1] = 1
 
-    rank = predict_advantage(adj, config['initial_node'], config['target_node'])
+    rank = predict_advantage(adj, initial_node, target_node)
 
     if len(rank) < 1:
       continue
@@ -173,7 +176,7 @@ def generate_random_graphs():
 
   ''' Saving dataset '''
   g_train, g_test, n_f_train, n_f_test, y_train, y_test = \
-    train_test_split(graphs, node_features, ranks, test_size=0.5)
+    train_test_split(graphs, node_features, ranks, test_size=0.2)
 
   save_graph_rank(g_train, y_train, n_f_train, os.path.join(config['data_path'],
                                                             config['path_random_path'], 'train'))

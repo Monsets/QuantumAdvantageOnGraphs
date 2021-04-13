@@ -13,7 +13,7 @@ config = {
 
 
     # Path graphs will be generated with number of nodes in n = 3, ..., max_node_path_graph
-    'max_node_for_path_graph': 8,
+    'max_node_for_path_graph': 7,
 
     # ============ RANDOM GRAPH ============ #
 

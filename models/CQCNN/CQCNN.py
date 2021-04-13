@@ -51,6 +51,21 @@ class EdgeToVertex(keras.layers.Layer):
         )
         return out
 
+def custom(y_true, y_pred):
+    cost = tf.math.log(tf.math.exp(y_true) / (tf.math.exp(y_pred[:, 0]) + tf.math.exp(y_pred[:, 1])) )
+
+def cross_entropy_balanced(y_true, y_pred):
+    # Note: tf.nn.sigmoid_cross_entropy_with_logits expects y_pred is logits,
+    # Keras expects probabilities.
+    # transform y_pred back to logits
+
+
+    cost = tf.nn.weighted_cross_entropy_with_logits(logits=y_pred, labels=y_true, pos_weight= 1949 / (1949 + 49))
+
+    cost = tf.reduce_mean(cost)
+
+    return cost
+
 ''' Model '''
 
 def CQNN(input):
@@ -68,7 +83,7 @@ def CQNN(input):
     # stocastic_avg_sgd = SWA(sgd, )
 
     model.compile(optimizer=sgd,
-                  loss=['binary_crossentropy'],
+                  loss=cross_entropy_balanced,
                   metrics=['accuracy', 'Recall', 'Precision', 'AUC'])
 
     return model
