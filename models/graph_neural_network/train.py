@@ -1,7 +1,6 @@
 import numpy as np
 
-from models.graph_neural_network.backbones import EncodeProcessDecode
-from models.graph_neural_network.model import Model
+from models.graph_neural_network1.model import Model
 from utils import plot_save_metrics
 
 if __name__ == '__main__':

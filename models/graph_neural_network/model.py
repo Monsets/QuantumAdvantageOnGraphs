@@ -6,8 +6,8 @@ import numpy as np
 from graph_nets import utils_tf, utils_np
 from sklearn.metrics import accuracy_score, recall_score, precision_score, classification_report
 
-from models.graph_neural_network.backbones import EncodeProcessDecode
-from models.graph_neural_network.dataloader import GraphTypleDataLoader
+from models.graph_neural_network1.backbones import EncodeProcessDecode
+from models.graph_neural_network1.dataloader import GraphTypleDataLoader
 
 
 class Model:
