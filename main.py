@@ -1,7 +1,7 @@
 import numpy as np
 
-from models.graph_neural_network.model import Model
-from utils import plot_save_metrics
+from models.graph_neural_network.model import GNNModel
+from utils import plot_metrics_per_class
 
 if __name__ == '__main__':
     seed = 2
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     PATH = 'data/random_graphs'
 
     backbone = 'en'
-    model = Model(backbone = backbone,
+    model = GNNModel(backbone = backbone,
                     datapath = PATH,
                     batch_size = batch_size,
                     message_passing_steps_train = num_processing_steps_tr,
@@ -25,4 +25,4 @@ if __name__ == '__main__':
 
     history = model.train()
 
-    plot_save_metrics(history)
+    plot_metrics_per_class(history, '')

@@ -1,15 +1,29 @@
+# Copyright 2018 The GraphNets Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+"""Model architectures for the demos."""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 from graph_nets import modules
 from graph_nets import utils_tf
-from six.moves import range
 import sonnet as snt
 
-
 NUM_LAYERS = 2  # Hard-code number of layers in the edge/node/global models.
-LATENT_SIZE = 32
+LATENT_SIZE = 16  # Hard-code latent layer sizes for demos.
 
 
 def make_mlp_model():
@@ -21,37 +35,39 @@ def make_mlp_model():
   """
   return snt.Sequential([
       snt.nets.MLP([LATENT_SIZE] * NUM_LAYERS, activate_final=True),
-      snt.LayerNorm(axis=-1, create_offset=True, create_scale=True)
+      snt.LayerNorm()
   ])
 
 
-class MLPGraphIndependent(snt.Module):
+class MLPGraphIndependent(snt.AbstractModule):
   """GraphIndependent with MLP edge, node, and global models."""
 
   def __init__(self, name="MLPGraphIndependent"):
     super(MLPGraphIndependent, self).__init__(name=name)
-    self._network = modules.GraphIndependent(
-        edge_model_fn=make_mlp_model,
-        node_model_fn=make_mlp_model,
-        global_model_fn=make_mlp_model)
+    with self._enter_variable_scope():
+      self._network = modules.GraphIndependent(
+          edge_model_fn=make_mlp_model,
+          node_model_fn=make_mlp_model,
+          global_model_fn=make_mlp_model)
 
-  def __call__(self, inputs):
+  def _build(self, inputs):
     return self._network(inputs)
 
 
-class MLPGraphNetwork(snt.Module):
+class MLPGraphNetwork(snt.AbstractModule):
   """GraphNetwork with MLP edge, node, and global models."""
 
   def __init__(self, name="MLPGraphNetwork"):
     super(MLPGraphNetwork, self).__init__(name=name)
-    self._network = modules.GraphNetwork(make_mlp_model, make_mlp_model,
-                                         make_mlp_model)
+    with self._enter_variable_scope():
+      self._network = modules.GraphNetwork(make_mlp_model, make_mlp_model,
+                                           make_mlp_model)
 
-  def __call__(self, inputs):
+  def _build(self, inputs):
     return self._network(inputs)
 
 
-class EncodeProcessDecode(snt.Module):
+class EncodeProcessDecode(snt.AbstractModule):
   """Full encode-process-decode model.
   The model we explore includes three components:
   - An "Encoder" graph net, which independently encodes the edge, node, and
@@ -94,10 +110,11 @@ class EncodeProcessDecode(snt.Module):
       global_fn = None
     else:
       global_fn = lambda: snt.Linear(global_output_size, name="global_output")
-    self._output_transform = modules.GraphIndependent(
-        edge_fn, node_fn, global_fn)
+    with self._enter_variable_scope():
+      self._output_transform = modules.GraphIndependent(edge_fn, node_fn,
+                                                        global_fn)
 
-  def __call__(self, input_op, num_processing_steps):
+  def _build(self, input_op, num_processing_steps):
     latent = self._encoder(input_op)
     latent0 = latent
     output_ops = []

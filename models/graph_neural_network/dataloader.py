@@ -30,9 +30,10 @@ class GraphTypleDataLoader:
         self.y_matrices = read_pickle(os.path.join(filepath, y_name))
 
         self.len = len(self.y_matrices)
-        if use_only > self.len:
-            raise IndexError('{} is out of data len which is {}'.format(use_only, self.len))
+
         if use_only:
+            if use_only > self.len:
+                raise IndexError('{} is out of data len which is {}'.format(use_only, self.len))
             self.len = use_only
             self.indices = np.array(range(use_only))
         else:
@@ -72,7 +73,7 @@ class GraphTypleDataLoader:
 
             # Set node features
             for i, node_feature in enumerate(feat):
-                nx_graph.nodes[i]['features'] = np.array(node_feature).astype(np.float).reshape(1)
+                nx_graph.nodes[i]['features'] = np.array(node_feature).astype(np.float).reshape(node_feature.shape[-1])
 
             # Set edge features to None if don't do that excplicitly conversion to graph_tuple fails
             for edge in nx_graph.edges:

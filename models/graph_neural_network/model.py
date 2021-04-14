@@ -6,11 +6,11 @@ import numpy as np
 from graph_nets import utils_tf, utils_np
 from sklearn.metrics import accuracy_score, recall_score, precision_score, classification_report
 
-from models.graph_neural_network1.backbones import EncodeProcessDecode
-from models.graph_neural_network1.dataloader import GraphTypleDataLoader
+from models.graph_neural_network.backbones import EncodeProcessDecode
+from models.graph_neural_network.dataloader import GraphTypleDataLoader
 
 
-class Model:
+class GNNModel:
 
     def __init__(self, backbone, datapath, batch_size, message_passing_steps_train,
                  learning_rate = 1e-3, verbose = 5, epochs = 1000,
@@ -33,7 +33,6 @@ class Model:
             self.model = EncodeProcessDecode(edge_output_size=2, node_output_size=2, global_output_size=2)
 
         # Initialize loss function
-        self._create_loss_ops()
         self.datapath = datapath
         self.use_only = use_only
         self.batch_size = batch_size
@@ -42,7 +41,7 @@ class Model:
         self.verbose = verbose
         self.message_passing_steps_train = message_passing_steps_train
 
-        if not message_passing_steps_train:
+        if not message_passing_steps_test:
             self.message_passing_steps_test = message_passing_steps_train
         else:
             self.message_passing_steps_test = message_passing_steps_test
@@ -66,7 +65,7 @@ class Model:
         self.target_ph = utils_tf.placeholders_from_networkxs(target_graphs)
 
 
-    def _make_all_runnable_in_session(*args):
+    def _make_all_runnable_in_session(self, *args):
         """Lets an iterable of TF graphs be output from a session as NP graphs."""
         return [utils_tf.make_runnable_in_session(a) for a in args]
 
@@ -106,7 +105,7 @@ class Model:
 
         metrics = [accuracy_score(true, preds), recall_score(true, preds), precision_score(true, preds)]
 
-        return metrics
+        return metrics, classification_report(true, preds, output_dict = True)
 
     def _initialize_loaders(self):
         '''
@@ -129,9 +128,10 @@ class Model:
         Creates placeholders, loss functions, optimizers, steps and everything else that is needed for model to train
         '''
         # Here we will save losses, metrics
-        self.history = {'loss': [], 'val_loss': [], 'accuracy': [], 'val_accuracy': [],
+        self.history = {'iter': [], 'loss': [], 'val_loss': [], 'accuracy': [], 'val_accuracy': [],
                         'recall': [], 'val_recall': [], 'precision': [], 'val_precision': [],
-                        '0': {'train': [], 'val': []}, '1': {'train': [], 'val': []}}
+                        '0': {'recall': [], 'val_recall': [], 'precision': [], 'val_precision': []},
+                        '1': {'recall': [], 'val_recall': [], 'precision': [], 'val_precision': []}}
         # Data.
         # Input and target placeholders.
         self._create_placeholders(self.dl_train)
@@ -139,6 +139,7 @@ class Model:
         # Connect the data to the model.
         # Instantiate the model.
         # A list of outputs, one per processing step.
+
         self.output_ops_tr = self.model(self.input_ph, self.message_passing_steps_train)
         self.output_ops_ge = self.model(self.input_ph, self.message_passing_steps_test)
 
@@ -155,7 +156,7 @@ class Model:
         self.step_op = optimizer.minimize(self.loss_op_tr)
 
         # Lets an iterable of TF graphs be output from a session as NP graphs.
-        self._make_all_runnable_in_session()
+        self._make_all_runnable_in_session(self.input_ph, self.target_ph)
 
     def train(self):
         '''
@@ -194,7 +195,7 @@ class Model:
 
             # Calculate metrics for train and test if current epoch is logging
             if epoch % self.verbose == 0:
-                metrics_train = self._compute_metrics(
+                metrics_train, class_report = self._compute_metrics(
                     train_targets, train_preds)
 
                 # Save outputs from batches to compute metrics on all data
@@ -217,10 +218,11 @@ class Model:
                     test_targets.append(test_values["target"])
                     test_losses.append(test_values['loss'])
 
-                metrics_test = self._compute_metrics(
+                metrics_test, class_report_val = self._compute_metrics(
                     test_targets, test_preds)
 
                 # Save history
+                self.history['iter'].append(epoch)
                 self.history['accuracy'].append(metrics_train[0])
                 self.history['val_accuracy'].append(metrics_train[0])
                 self.history['recall'].append(metrics_train[2])
@@ -230,12 +232,14 @@ class Model:
                 self.history['loss'].append(np.mean(train_losses))
                 self.history['val_loss'].append(np.mean(test_losses))
                 # Metrics per class
-                class_report_val = classification_report(test_targets, test_preds)
-                class_report = classification_report(train_targets, train_preds)
-                self.history['0']['train'].append(class_report['0'])
-                self.history['0']['val'].append(class_report_val['0'])
-                self.history['1']['train'].append(class_report['0'])
-                self.history['1']['val'].append(class_report_val['1'])
+                self.history['0']['precision'].append(class_report['0']['precision'])
+                self.history['0']['recall'].append(class_report['0']['recall'])
+                self.history['0']['val_precision'].append(class_report_val['0']['precision'])
+                self.history['0']['val_recall'].append(class_report_val['0']['recall'])
+                self.history['1']['precision'].append(class_report['1']['precision'])
+                self.history['1']['recall'].append(class_report['1']['recall'])
+                self.history['1']['val_precision'].append(class_report_val['1']['precision'])
+                self.history['1']['val_recall'].append(class_report_val['1']['recall'])
 
                 print("# {:05d}, Train loss {:.4f}, Test loss {:.4f}, Train Accuracy {:.4f}, Test Accuracy"
                       " {:.4f}, Train Recall {:.4f}, Test Recall"
