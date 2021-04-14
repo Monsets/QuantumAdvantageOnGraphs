@@ -22,7 +22,7 @@ if __name__ == '__main__':
                     datapath = PATH,
                     batch_size = batch_size,
                     message_passing_steps_train = num_processing_steps_tr,
-                    epoch = 1)
+                    epochs = 1)
 
     history = model.train()
 

@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 
 from graph_nets import utils_tf, utils_np
-from sklearn.metrics import accuracy_score, recall_score, precision_score
+from sklearn.metrics import accuracy_score, recall_score, precision_score, classification_report
 
 from models.graph_neural_network.backbones import EncodeProcessDecode
 from models.graph_neural_network.dataloader import GraphTypleDataLoader
@@ -48,11 +48,12 @@ class Model:
             self.message_passing_steps_test = message_passing_steps_test
 
     def _create_loss_ops(self, output_ops):
-        self.loss_ops = [
+        loss_ops = [
             tf.losses.softmax_cross_entropy(self.target_ph.globals, output_op.globals)
             for output_op in output_ops
         ]
 
+        return loss_ops
 
     def _create_placeholders(self, loader):
         '''
@@ -129,7 +130,8 @@ class Model:
         '''
         # Here we will save losses, metrics
         self.history = {'loss': [], 'val_loss': [], 'accuracy': [], 'val_accuracy': [],
-                        'recall': [], 'val_recall': [], 'precision': [], 'val_precision': []}
+                        'recall': [], 'val_recall': [], 'precision': [], 'val_precision': [],
+                        '0': {'train': [], 'val': []}, '1': {'train': [], 'val': []}}
         # Data.
         # Input and target placeholders.
         self._create_placeholders(self.dl_train)
@@ -227,6 +229,13 @@ class Model:
                 self.history['val_precision'].append(metrics_train[1])
                 self.history['loss'].append(np.mean(train_losses))
                 self.history['val_loss'].append(np.mean(test_losses))
+                # Metrics per class
+                class_report_val = classification_report(test_targets, test_preds)
+                class_report = classification_report(train_targets, train_preds)
+                self.history['0']['train'].append(class_report['0'])
+                self.history['0']['val'].append(class_report_val['0'])
+                self.history['1']['train'].append(class_report['0'])
+                self.history['1']['val'].append(class_report_val['1'])
 
                 print("# {:05d}, Train loss {:.4f}, Test loss {:.4f}, Train Accuracy {:.4f}, Test Accuracy"
                       " {:.4f}, Train Recall {:.4f}, Test Recall"
