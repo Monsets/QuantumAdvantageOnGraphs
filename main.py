@@ -8,11 +8,11 @@ if __name__ == '__main__':
     rand = np.random.RandomState(seed=seed)
     # Model parameters.
     # Number of processing (message-passing) steps.
-    num_processing_steps_tr = 2
-    num_processing_steps_ge = 2
-    num_training_iterations = 10000
+    num_processing_steps_tr = 5
+    num_processing_steps_ge = 5
+    epochs = 1000
 
-    batch_size = 128
+    batch_size = 64
     USE_ONLY = 3000
     PATH = 'data/random_graphs'
 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
                     datapath = PATH,
                     batch_size = batch_size,
                     message_passing_steps_train = num_processing_steps_tr,
-                    epochs = 1)
+                    epochs = epochs)
 
     history = model.train()
 

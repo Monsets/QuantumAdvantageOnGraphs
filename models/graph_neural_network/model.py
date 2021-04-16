@@ -14,7 +14,7 @@ class GNNModel:
 
     def __init__(self, backbone, datapath, batch_size, message_passing_steps_train,
                  learning_rate = 1e-3, verbose = 5, epochs = 1000,
-                 message_passing_steps_test = None, use_only = False,):
+                 message_passing_steps_test = None, use_only = False, chechpoint_path = ''):
 
         '''
 
@@ -40,6 +40,7 @@ class GNNModel:
         self.epochs = epochs
         self.verbose = verbose
         self.message_passing_steps_train = message_passing_steps_train
+        self.checkpoint_path = chechpoint_path
 
         if not message_passing_steps_test:
             self.message_passing_steps_test = message_passing_steps_train
@@ -250,4 +251,6 @@ class GNNModel:
                                         metrics_test[1],
                                         metrics_train[2],
                                         metrics_test[2]))
+
+
         return self.history
